@@ -10,12 +10,15 @@ var roomControl = require('room.alpha');
 
 
 module.exports.loop = function () {
-    var MaxHarvest = 0;
-    var MaxBuilder = 1;
-    var MaxUpgrader = 2;
-    var MaxFixer =1;
-    var MaxMule = 2;
-    var MaxTick = 2;
+
+    roomControl.run('E44N38');
+
+    var MaxHarvest = 1;
+    var MaxBuilder = 0;
+    var MaxUpgrader = 0;
+    var MaxFixer =0;
+    var MaxMule = 0;
+    var MaxTick = 0;
     var MaxForager =0;
     var MaxLDMule = 0;
     var MaxLDTick = 0;
@@ -31,18 +34,18 @@ module.exports.loop = function () {
     {
         //mehhhhh
     }
-    
-    
+
+
         runTower('59c87ac66e8ccf1376611345');
         runTower('59f4decc473d6f1899b656f6');
         runTower('59b47e88e1065233e38d42ee');
         runTower('59b820293740587d2ce95b44');
         runTower('59f4e8355221ba30b82f81a4');
         runTower('59f4f086db2fbe0220035a9f');
-        
-        
-        
-    
+
+
+
+
     	for(let name in Memory.creeps)
     	{
     		if(Game.creeps[name]==undefined)
@@ -50,8 +53,8 @@ module.exports.loop = function () {
     			delete Memory.creeps[name];
     		}
     	}
-    
-    
+
+
     	var MyCreeps = [0,0,0,0,0,0,0,0,0,0,0];
         for(var name in ThisRoomsCreeps) {
             var creep = ThisRoomsCreeps[name];
@@ -85,7 +88,7 @@ module.exports.loop = function () {
                     {
                         MyCreeps[6]+=1;
                         roleForager.run(creep);
-                        
+
                     }
                     if(creep.memory.MyTravel == 5)
                     {
@@ -105,7 +108,7 @@ module.exports.loop = function () {
         		break;
     		}
         }
-        
+
     	if (!Game.spawns['Spawn.Prime'].spawning)
     	{
     	    //console.log(MyCreeps.toString());
@@ -189,7 +192,7 @@ module.exports.loop = function () {
                                             			//spawn forager direction 5, this is temporary to just be an annoyance to littleBird.
                                             			var name = Game.spawns['Spawn.Prime'].createCreep( [ WORK, CARRY, CARRY,  MOVE,MOVE, MOVE], undefined,{role:'forager', MyHome:Game.spawns['Spawn.Prime'].room.name, MyTravel: 5,myRoom:'E19S33'} );
                                             			console.log('Spawning: Forager '+ name);
-                                            		
+
     												}
     											}
     										}
@@ -208,10 +211,11 @@ module.exports.loop = function () {
     	    {
     	        Game.spawns['Spawn.Prime'].createCreep( [WORK, CARRY,MOVE,MOVE], undefined,{role:'harvester'} );
     	    }
-    	
+
     }
 
-    roomControl.run('E19S34');
+    //roomControl.run('E19S34');
+
 }
 
 /*
@@ -222,7 +226,7 @@ it should also be able to find what creeps it does have
 it should know where to spawn things, though that may be a global thing the spawn manager
 but we'll make it a function so that can all be changed later.
 and lastly it should run every creep, currently I run creeps based on wierd criteria, this should be centralized instead of individual agents
-that should be condensed down... 
+that should be condensed down...
 ARRRGGGHHH Everytime I start working on something I realize the thousand and one other things I should be working on
 todo: change EVERY SPAWN CODE TO HAVE A BASE ROOM
 todo: completely rewrite all screeps code, look at harvester and forager code for examples.
@@ -232,7 +236,7 @@ todo: completely rewrite all screeps code, look at harvester and forager code fo
 function spawnGeneral(spawnPoint, typeOfSpawn, max = 13)
 {
     var top = Game.spawns[spawnPoint].room.energyCapacityAvailable;
-    
+
     var loop = Math.floor(top/250);
     var i=0;
     var body = [];
@@ -269,7 +273,7 @@ function runTower(towerID)
 		}
 		else
 		{
-			
+
 			var rampRepair = tower.room.find(FIND_STRUCTURES, {filter: s=> s.structureType == STRUCTURE_RAMPART || s.structureType == STRUCTURE_WALL});
 			for (let ramps of rampRepair)
 			{
@@ -283,7 +287,7 @@ function runTower(towerID)
 			{
 				tower.heal(creepToRepair);
 			}
-			
+
 		}
 	}
 }

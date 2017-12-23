@@ -5,17 +5,43 @@ var roleUpgrader = require('role.upgrader');
 var roleMule = require('role.mule');
 var roleTick = require('role.tick');
 
-var runRoom = {
+/*
+how do we determine the spawn list for this room?
+first off we need to formalize a setup for these things
+ok, make an object for the room, store it in memory.
+max values could then be recalled with this.['max' + creep.role]
+this would allow me to later dynmically add and remove creeps
 
+second I need a way to just run all my creeps regardless... maybe create a central
+list of all the types of creeps and run as needed?
+
+second issue I need to do is I REALLY need to fix the ticks,
+their inability to drop mine is frankly painfull.
+hard to write automatic rules when the basis of industry doesn't work
+
+ok, so first off check controller level
+if level 0, spawn list should be 4 generalists?
+
+then from that point on energyCapacity?
+
+
+damn, something like a trello board does sound like a good idea.
+
+
+
+*/
+
+
+var runRoom = {
     run: function(RoomName) {
         //Spawn caps
         //TODO: make this dynamic
         //set by room level?  set by energy available?  how do I want to do this?
         //also, do I want to make this entirely dynamic?  lattice my extensions automatically?
         //what about defenses and storages?
-        var MaxMule = 2;
-        var MaxTick = 2;
-        var MaxGeneralist = 3;
+        var MaxMule = 0;
+        var MaxTick = 0;
+        var MaxGeneralist = 2;
         var MaxUpgrader =1;
 
         //room control methods
@@ -131,7 +157,11 @@ var runRoom = {
     		    else
     		    {
     		        //TODO: make the need change depending on room needs
-    		        idlecreeps[i].memory.action ='upgrade';
+    		        idlecreeps[i].memory.action ='deposit';
+    		        if(myRoom.energyCapacityAvailable==myRoom.energyAvailable)
+    		        {
+    	              idlecreeps[i].memory.action ='upgrade';
+    		        }
     		        idlecreeps[i].memory.target = myRoom.controller.id;
     		    }
 
