@@ -9,18 +9,22 @@ var roleGeneric = {
         if(creep.carry.energy ==0){
             creep.memory.action = 'resupply';//change this later to be targetted, works for now.
         }
-        
-    
+
+
         switch(creep.memory.action){
             case 'harvest':
                 amifull(creep);
                 actHarvest.run(creep);
                 break;
             case 'deposit':
-                actDeposit.run(creep);
-                break;
+              if(creep.room.energyCapacityAvailable==creep.room.energyAvailable)
+              {
+                creep.memory.action='resupply';
+              }
+              actDeposit.run(creep);
+              break;
             case 'repair':
-                
+
                 if(target.hits == target.hitsMax){
                     creep.memory.action = 'idle';
                     break;

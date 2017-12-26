@@ -4,6 +4,7 @@ var roleFixer = require('role.fixer');
 var roleUpgrader = require('role.upgrader');
 var roleMule = require('role.mule');
 var roleTick = require('role.tick');
+var roleClaimer = require('role.claimer');
 
 /*
 how do we determine the spawn list for this room?
@@ -15,8 +16,7 @@ this would allow me to later dynmically add and remove creeps
 second I need a way to just run all my creeps regardless... maybe create a central
 list of all the types of creeps and run as needed?
 
-second issue I need to do is I REALLY need to fix the ticks,
-their inability to drop mine is frankly painfull.
+
 hard to write automatic rules when the basis of industry doesn't work
 
 ok, so first off check controller level
@@ -26,6 +26,11 @@ then from that point on energyCapacity?
 
 
 damn, something like a trello board does sound like a good idea.
+
+DONE:
+second issue I need to do is I REALLY need to fix the ticks,
+their inability to drop mine is frankly painfull.
+
 
 
 
@@ -39,9 +44,9 @@ var runRoom = {
         //set by room level?  set by energy available?  how do I want to do this?
         //also, do I want to make this entirely dynamic?  lattice my extensions automatically?
         //what about defenses and storages?
-        var MaxMule = 0;
-        var MaxTick = 0;
-        var MaxGeneralist = 2;
+        var MaxMule = 2;
+        var MaxTick = 2;
+        var MaxGeneralist = 3;
         var MaxUpgrader =1;
 
         //room control methods
@@ -51,14 +56,17 @@ var runRoom = {
 		var MyCreeps = [0,0,0,0]
 
         //TODO: search the room and find my towers.
-        runTower('59e01abdf8a4427bcdaccadd');
-        runTower('59e46bcf6075d0438a53234d');
+        //runTower('59e01abdf8a4427bcdaccadd');
+        //runTower('59e46bcf6075d0438a53234d');
 
 
         //set values
         myRoom = Game.rooms[RoomName];
+
         //TODO: make the towers dynamic
-        //myTowers = myRoom.find(STRUCTURE_TOWER);
+        myTowers = myRoom.find(STRUCTURE_TOWER);
+        myTowers.forEach(x=>runTower(x.name));
+
         if(myRoom.memory.timer == undefined)
         {
             myRoom.memory.timer =0;
@@ -78,7 +86,7 @@ var runRoom = {
             //TODO: works for single spawner, upgrade this to multiple later.
             mySpawn = myRoom.find(FIND_MY_SPAWNS);
 
-            if(Array.isArray(mySpawn))
+            if(mySpawn.length>0)
             {
                 console.log(mySpawn.length);
                 myRoom.memory.mySpawn = mySpawn[0].id;
@@ -169,7 +177,7 @@ var runRoom = {
 		}
 
 		//respawn code here
-		if(!mySpawn.spawning)
+		if(mySpawn!="" && !mySpawn.spawning)
 		{
     		if(MyCreeps[3] <MaxGeneralist)
     		{
@@ -184,10 +192,8 @@ var runRoom = {
     		if(MyCreeps[1]<MaxMule)
     		{
     			//spawn mule
-    			var name = mySpawn.createCreep( [CARRY, CARRY,CARRY, CARRY,CARRY,CARRY, CARRY,CARRY, CARRY,CARRY, MOVE,MOVE,MOVE,MOVE,MOVE,MOVE, MOVE,MOVE,MOVE,MOVE
-    			], undefined,{role:'mule',myRoom:RoomName} );
+    			spawnMule(mySpawn.name, RoomName);
     			//var name = Game.spawns['Spawn.Prime'].createCreep( [CARRY, CARRY,MOVE,MOVE,CARRY, CARRY,MOVE,MOVE], undefined,{role:'mule'} );
-    			console.log('Spawning: Mule '+ name + 'in room '+ RoomName );
     		}
     		if(MyCreeps[2]<MaxUpgrader)
     		{
@@ -306,6 +312,33 @@ function spawnGeneral(spawnPoint, typeOfSpawn, roomName, max = 13)
     }
 	var name = Game.spawns[spawnPoint].createCreep( body, undefined,{role:typeOfSpawn,myRoom:roomName} );
 	console.log('Spawning: '+typeOfSpawn+ ', ' + name + ' size: ' + loop);
+}
+
+function spawnMule(spawnPoint, roomName, max = 13)
+{
+    var top = Game.spawns[spawnPoint].room.energyCapacityAvailable;
+
+    var loop = Math.floor(top/100);
+    var i=0;
+    var body = [];
+	if(max<loop)
+	{
+		loop=max;
+	}
+	if(Game.spawns[spawnPoint].room.energyAvailable < loop*100)
+	{
+	    //console.log('Failed to spawn: '+typeOfSpawn + 'in '+roomName+ ' room has: ' +Game.spawns[spawnPoint].room.energyAvailable + ' / ' +Game.spawns[spawnPoint].room.energyCapacityAvailable + ' seeking: ' + loop*250);
+	    return;
+	}
+    while(i<loop)
+    {
+        body.push(CARRY);
+        body.push(MOVE);
+        i++;
+        //console.log('looped once: ' + i);
+    }
+	var name = Game.spawns[spawnPoint].createCreep( body, undefined,{role:"mule",myRoom:roomName} );
+	console.log('Spawning: Mule, ' + name + ' size: ' + loop);
 }
 
 function runTower(towerID)

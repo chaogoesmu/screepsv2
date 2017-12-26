@@ -35,10 +35,11 @@ var actHarvest = {
         }
         else
         {
-            if(creep.pickup(target) == ERR_NOT_IN_RANGE) 
+          //TODO: make it find the largest dropped resource deposit first, so we stop getting that bouncing situation.
+            if(creep.pickup(target) == ERR_NOT_IN_RANGE)
             {
                 creep.moveTo(target);
-                creep.say('5secRule'); 
+                creep.say('5secRule');
             }
         }
     }

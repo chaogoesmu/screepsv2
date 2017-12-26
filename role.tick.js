@@ -11,14 +11,21 @@ var roleTick = {
         {
             creep.memory.MyTask = -1;
         }
-		
+
 		switch(creep.memory.MyTask){
 			case 0://get more energy
 				FindMoveContainer(creep);
 			    break;
 			case 1://go fill somethings energy
-                creep.harvest(Game.getObjectById(creep.memory.MySource));
+          creep.harvest(Game.getObjectById(creep.memory.MySource));
 			    break;
+      case 2:
+        let source=Game.getObjectById(creep.memory.MySource);
+        if(creep.harvest(source) == ERR_NOT_IN_RANGE)
+        {
+          creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+        }
+        break;
 			default://uhoh
     			console.log('initializing tick');
     			creep.memory.MyContainer = 0;
@@ -37,27 +44,28 @@ function FindMoveContainer(creep)
         // iterate over all sources
         for (let source of sources) {
         	// if the source has no miner
-        	if (!_.some(creepsInRoom, c => c.memory.role == 'tick' && c.memory.MySource == source.id)) 
+        	if (!_.some(creepsInRoom, c => c.memory.role == 'tick' && c.memory.MySource == source.id))
         	{
         		// check whether or not the source has a container
-        		let containers = source.pos.findInRange(FIND_STRUCTURES, 1, 
+        		let containers = source.pos.findInRange(FIND_STRUCTURES, 1,
         		{
         			filter: s => s.structureType == STRUCTURE_CONTAINER
         		});
-        		
+
         		// if there is a container next to the source
-        		if (containers!= undefined) {
-        		    (!_.some(creepsInRoom, c => c.memory.role == 'tick' && c.memory.MyContainer == containers[0].id)) 
+        		if (containers.length>0) {
+        		    (!_.some(creepsInRoom, c => c.memory.role == 'tick' && c.memory.MyContainer == containers[0].id))
         			creep.memory.MyContainer = containers[0].id;
         			creep.memory.MySource = source.id;
         			break;
         		}
-        		else
-        		{
-           			creep.memory.MyContainer = containers[1].id;
-        			creep.memory.MySource = source.id;
-        			break;
-        		}
+            else {
+              {
+                creep.memory.MySource = source.id;
+                creep.memory.MyTask = 2;
+                creep.memory.MyContainer =-1;
+              }
+            }
         	}
         }
     }
@@ -66,7 +74,7 @@ function FindMoveContainer(creep)
         console.log('no container found');
     }
     creep.moveTo(Game.getObjectById(creep.memory.MyContainer));
-    if (creep.pos.isEqualTo(Game.getObjectById(creep.memory.MyContainer))) 
+    if (creep.pos.isEqualTo(Game.getObjectById(creep.memory.MyContainer)))
     {
         creep.memory.MyTask = 1;
     }
