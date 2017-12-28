@@ -35,6 +35,7 @@ var roleTick = {
 		}
 	}
 };
+//Game.spawns['Spawn.Prime'].createCreep( [WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE], undefined,{role:'tick',myRoom:'E44N37',MyContainer:-1,MySource:'59830067b097071b4adc4362', MyTask:2} )
 function FindMoveContainer(creep)
 {
     if(creep.memory.MyContainer == 0)

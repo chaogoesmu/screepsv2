@@ -38,16 +38,14 @@ their inability to drop mine is frankly painfull.
 
 
 var runRoom = {
-    run: function(RoomName) {
+    run: function(RoomName, parentSpawnID) {
         //Spawn caps
         //TODO: make this dynamic
         //set by room level?  set by energy available?  how do I want to do this?
         //also, do I want to make this entirely dynamic?  lattice my extensions automatically?
         //what about defenses and storages?
-        var MaxMule = 2;
-        var MaxTick = 2;
-        var MaxGeneralist = 3;
-        var MaxUpgrader =1;
+
+
 
         //room control methods
 		var genericCount =0;
@@ -62,10 +60,17 @@ var runRoom = {
 
         //set values
         myRoom = Game.rooms[RoomName];
-
-        //TODO: make the towers dynamic
-        myTowers = myRoom.find(STRUCTURE_TOWER);
-        myTowers.forEach(x=>runTower(x.name));
+        if(myRoom.memory.spawnList == undefined)
+        {
+          myRoom.memory.spawnList = [0,0,0,0]
+        }
+        var MaxMule = myRoom.memory.spawnList[0];
+        var MaxTick = myRoom.memory.spawnList[1];
+        var MaxGeneralist = myRoom.memory.spawnList[2];
+        var MaxUpgrader =myRoom.memory.spawnList[3];
+        //TODO: make the towers store turn by turn targeting as this eats CPU.
+        myTowers = myRoom.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+        myTowers.forEach(x=>runTower(x.id));
 
         if(myRoom.memory.timer == undefined)
         {
@@ -94,7 +99,7 @@ var runRoom = {
             }
             else
             {
-                myRoom.memory.mySpawn = mySpawn.id;
+                mySpawn = parentSpawnID;
             }
         }
         else
@@ -152,15 +157,22 @@ var runRoom = {
 		{
 		    var jobs = getJobs(myRoom);
 		    var i=0;
+        var i1=0;//TODO: clean this up
 		    for(;i<idlecreeps.length;i++)
 		    {
     		    //if I have idle creeps lets look for tasks, otherwise waste of cpu.
     		    //console.log('idle creeps: ' + idlecreeps.length);
-    		    if(i<jobs.length)
+    		    if(i1<jobs.length)
     		    {
-    		        idlecreeps[i].say(jobs[i][0]);
-    		        idlecreeps[i].memory.action =jobs[i][0];
-    		        idlecreeps[i].memory.target =jobs[i][1];
+    		        idlecreeps[i].say(jobs[i1][0]);
+    		        idlecreeps[i].memory.action =jobs[i1][0];
+    		        idlecreeps[i].memory.target =jobs[i1][1];
+                //TODO: Currently doing this to rush each build, make this smarter.
+                if(jobs[i1][0]=='build')
+                {
+                  i1--;
+                }
+                i1++;
     		    }
     		    else
     		    {
@@ -171,7 +183,7 @@ var runRoom = {
     	              idlecreeps[i].memory.action ='upgrade';
     		        }
     		        idlecreeps[i].memory.target = myRoom.controller.id;
-    		    }
+                idlecreeps[i].say(idlecreeps[i].memory.action);    		    }
 
 		    }
 		}
@@ -183,7 +195,7 @@ var runRoom = {
     		{
     		    spawnGeneral(mySpawn.name,'generalist',RoomName,4);
     		}
-    		if(MyCreeps[0]<MaxTick)// && mySpawn.room.energyAvailable > 700
+    		if(MyCreeps[0]<MaxTick && mySpawn.room.energyAvailable >= 700)
     		{
     			//spawn tick
     			var name = mySpawn.createCreep( [WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE], undefined,{role:'tick',myRoom:RoomName} );
@@ -193,7 +205,7 @@ var runRoom = {
     		{
     			//spawn mule
     			spawnMule(mySpawn.name, RoomName);
-    			//var name = Game.spawns['Spawn.Prime'].createCreep( [CARRY, CARRY,MOVE,MOVE,CARRY, CARRY,MOVE,MOVE], undefined,{role:'mule'} );
+//Game.spawns['Spawn.Prime'].createCreep( [CARRY, CARRY,MOVE,MOVE,CARRY, CARRY,MOVE,MOVE], undefined,{role:'mule'} );
     		}
     		if(MyCreeps[2]<MaxUpgrader)
     		{
@@ -344,7 +356,7 @@ function spawnMule(spawnPoint, roomName, max = 13)
 function runTower(towerID)
 {
 	var tower = Game.getObjectById(towerID);
-	var minRepair = 860000;
+	var minRepair = 1000;
 	if(tower) {
 		var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
 		if(closestHostile) {

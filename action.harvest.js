@@ -3,6 +3,7 @@ var actHarvest = {
     /** @param {Creep} creep **/
     run: function(creep) {
         //find dropped resources
+        //TODO: this is being run on every single gather tick... I believe this can be a set once
         target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
         if(!target)
         {
